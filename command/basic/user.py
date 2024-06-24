@@ -1,4 +1,4 @@
-from aiogram import types
+from aiogram import types, Bot
 
 class UserInfo:
     def __init__(self, data):
@@ -22,7 +22,7 @@ class UserInfo:
         self.username = user.username
         self.language = user.language_code
         
-    async def get_user_member(self, user_id, bot):
+    async def get_user_member(self, user_id, bot: Bot):
         chat_id= "YOUR_CHANNEL"
         user_count = await bot.get_chat_member(chat_id, user_id)
         return user_count.status

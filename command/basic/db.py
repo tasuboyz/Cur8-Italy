@@ -8,6 +8,7 @@ class Database():
         #table
         self.USER_INFO = 'USER_INFO'
         self.STEEM_USER = 'STEEM_USER'
+        self.USER_CHANNEL = 'USER_CHANNEL'
 
         #columns
         self.user_id = "user_id"
@@ -15,11 +16,13 @@ class Database():
         self.steem_username = "steem_username"
         self.steem_post = "steem_post"
         self.post_date = "post_date"
+        self.channel_id = 'channel_id'
     pass
         
     def create_table(self):
         self.c.execute(f'''CREATE TABLE IF NOT EXISTS {self.USER_INFO} ({self.user_id} INTEGER PRIMARY KEY, {self.username} TEXT)''')
         self.c.execute(f'''CREATE TABLE IF NOT EXISTS {self.STEEM_USER} ({self.steem_username} TEXT PRIMARY KEY, {self.steem_post} TEXT, {self.post_date} TEXT)''')
+        self.c.execute(f'''CREATE TABLE IF NOT EXISTS {self.USER_CHANNEL} ({self.channel_id} INTEGER, {self.user_id} INT)''')
         self.conn.commit()
 
     def insert_user_data(self, user_id, username):
@@ -121,3 +124,18 @@ class Database():
         self.c.execute(f"SELECT COUNT({self.steem_username}) FROM {self.STEEM_USER}")
         row_count = self.c.fetchone()[0]
         return row_count   
+    
+    def insert_user_channel(self, channel_id, user_id):
+        self.c.execute(f"INSERT OR REPLACE INTO {self.USER_CHANNEL} ({self.channel_id}, {self.user_id}) VALUES (?, ?)", (channel_id, user_id))
+        self.conn.commit()
+
+    def delate_channel_id(self, channel_id):
+        self.c.execute(f"DELETE FROM {self.USER_CHANNEL} WHERE {self.channel_id} = ?", (channel_id,)) 
+        self.conn.commit()
+        return f"Deleted"
+    
+    def get_all_channel_user(self, user_id):
+        self.c.execute(f'''SELECT {self.channel_id} FROM {self.USER_CHANNEL} WHERE {self.user_id} = ?''', (user_id,))
+        results = self.c.fetchall()        
+        self.conn.commit()
+        return results
