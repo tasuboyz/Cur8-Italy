@@ -3,8 +3,7 @@ from aiogram.types.web_app_info import WebAppInfo
 
 from aiogram import F, Bot, Dispatcher, Router, types
 
-from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.filters import CommandStart, Command, ChatMemberUpdatedFilter, IS_MEMBER, IS_NOT_MEMBER, IS_ADMIN
 from command.admin_panel import Admin_Commands
 from command.user_commands import User_Commands
 
@@ -29,3 +28,13 @@ class BOT():
         self.dp.callback_query(F.data == "save_steem_username")(self.command.wait_username) 
         self.dp.message(Form.set_ads)(self.admin_command.send_ads)
         self.dp.message(Form.set_username, F.text)(self.command.recive_username)
+        self.dp.message(F.web_app_data)(self.command.recive_web_data)
+        
+        #serch community
+        self.dp.inline_query()(self.command.inline_query_handler)
+        self.dp.message(F.text == 'Search community')(self.command.search_community)
+        self.dp.message(Form.set_community, F.text)(self.command.view_selected_community)
+
+        #manage channel
+        self.dp.my_chat_member(ChatMemberUpdatedFilter(IS_NOT_MEMBER >> IS_ADMIN))(self.command.bot_added)
+        self.dp.my_chat_member(ChatMemberUpdatedFilter(IS_MEMBER >> IS_NOT_MEMBER))(self.command.bot_leaved)
