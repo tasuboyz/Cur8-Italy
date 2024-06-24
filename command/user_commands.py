@@ -186,7 +186,7 @@ class User_Commands:
     """
         message2 = "🏆 *Top 10 Delegatori Steem*\n"
         for delegator, total_amount in top_10_steem_delegator:
-            message2 += f"▫️ {delegator}: **{total_amount:.2f} HP**\n"
+            message2 += f"▫️ {delegator}: **{total_amount:.2f} SP**\n"
 
         message3 = "🏆 *Top 10 Delegatori Hive*\n"
         for delegator, total_amount in top_10_hive_delegator:
