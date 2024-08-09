@@ -43,7 +43,7 @@ def view_steem_communit_post(community, offset):
                 id = result['post_id']
                 #desciption = result['body']
                 url = result['url']
-                thumbnail_url=result['json_metadata']['image'][0]
+                thumbnail_url = result['json_metadata'].get('image', [None])[0]
 
                 inline_result = types.InlineQueryResultArticle(
                     id=f"{id}",

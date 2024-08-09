@@ -1,4 +1,5 @@
 from aiogram import types, Bot
+from .db import Database
 
 class UserInfo:
     def __init__(self, data):
@@ -20,7 +21,11 @@ class UserInfo:
         self.first_name = user.first_name
         self.last_name = user.last_name
         self.username = user.username
-        self.language = user.language_code
+        self.setting = Database().get_language_code(self.user_id)
+        if self.setting == None:
+            self.language = user.language_code
+        else:
+            self.language = self.setting
         
     async def get_user_member(self, user_id, bot: Bot):
         chat_id= "YOUR_CHANNEL"

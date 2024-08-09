@@ -5,3 +5,4 @@ class Form(StatesGroup):
     set_ads = State()
     set_username = State()
     set_community = State()
+    set_keys = State()
