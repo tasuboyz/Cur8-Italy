@@ -1,9 +1,8 @@
 import logging
 
-TOKEN = "6348055484:AAGhOv6sx5B4acQj-XUfRWV3kJz53FvioWs" #TasuAdmin
-#TOKEN = '7122531030:AAGK6dDoGpeDSShlTuJnbXEJkmXZpV6m06s' #token produzione
+TOKEN = ""
 
-admin_id = 1026795763
+admin_id = 12345
 
 account_creation_channel = -1002247582547
 
@@ -23,7 +22,7 @@ WEBHOOK_PATH = r"/webhook"
 
 WEBHOOK_SECRET = "my-secret"
 
-BASE_WEBHOOK_URL = "https://fe43-2-36-105-41.ngrok-free.app"
+BASE_WEBHOOK_URL = "https://"
 
 # cur8_channel = '@test_sniper_cur8'
 
