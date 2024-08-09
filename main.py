@@ -1,38 +1,45 @@
-from telegram_bot import BOT
-
 import asyncio
+from aiohttp import web
+from aiogram import Bot, types
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+
+from telegram_bot import BOT
 from command.basic.logger_config import logger
 from command.basic.ascii import art
 from command.basic.db import Database
 from command.basic.instance import bot
 from command.bot_action import BotCommand
-from datetime import datetime
 from command.basic.config import BASE_WEBHOOK_URL, WEBHOOK_PATH, WEBHOOK_SECRET, WEB_SERVER_HOST, WEB_SERVER_PORT
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
-from aiohttp import web
-from aiogram import Bot
 
 process = True
+my_bot = BOT()
 
 async def on_startup(bot: Bot) -> None:
     print(f"{art}")
     Database().create_table()
+    await bot.delete_webhook()
     await bot.set_webhook(f"{BASE_WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
 
-def on_stop():
-    process = False
-    print("Bot stoped")
+async def on_shutdown(dp):
+    await bot.delete_webhook()
+
+async def handle(request):
+    return web.FileResponse('./dist/index.html')
 
 async def main():
     try:
-        my_bot = BOT()
+        app = web.Application()
         my_bot.dp.startup.register(on_startup)
         my_bot.dp.include_router(my_bot.router)
+
+        app.router.add_get('/', handle)
+        app.router.add_static('/assets/', path='./dist/assets', name='assets')
+
         command = BotCommand()
         asyncio.create_task(command.post_programmed())
         asyncio.create_task(command.time_check())
         asyncio.create_task(command.send_post_link())
-        app = web.Application()
+        
         webhook_requests_handler = SimpleRequestHandler(
             dispatcher=my_bot.dp,
             bot=bot,
@@ -55,7 +62,7 @@ async def main():
     except KeyboardInterrupt:
         print("Interrotto dall'utente")
     finally:
-        on_stop()
+        await on_shutdown()
 
 if __name__ == '__main__':
     try:
