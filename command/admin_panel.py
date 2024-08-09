@@ -9,6 +9,7 @@ from .basic import instance
 from .basic import config
 from aiogram.fsm.context import FSMContext
 from .basic.memory import Form
+import json
 
 class Admin_Commands:
     def __init__(self):
@@ -123,13 +124,60 @@ class Admin_Commands:
                     await message.send_copy(user_id[0])
                     #logger.error(f"{user_id[0]} Sended! {count}")
                     count += 1
-                    await asyncio.sleep(0.2)
-                    await self.bot.edit_message_text(chat_id=self.admin_id, text=f"{count}", message_id=counter.message_id)
+                    if count % 100 == 0:
+                        await self.bot.edit_message_text(chat_id=self.admin_id, text=f"{count}", message_id=counter.message_id)
                 except Exception as e:             
-                    logger.error(f"{user_id[0]}, delated \n{e}") 
+                    # logger.error(f"{user_id[0]}, delated \n{e}") 
                     id_to_delate.append(user_id[0])
         finally:
             for ids in id_to_delate:
-                Database().delate_ids(ids)      
-                logger.error(f"Completed!")        
-                await self.bot.edit_message_text(chat_id=self.admin_id, text=f"finished!", message_id=counter.message_id)
+                Database().delate_ids(ids)          
+            await self.bot.edit_message_text(chat_id=self.admin_id, text=f"finished!", message_id=counter.message_id)
+
+    async def set_key(self, callback_query: CallbackQuery, state: FSMContext):
+        data = callback_query.data  
+        info = UserInfo(callback_query)
+        admin_id = info.user_id
+        admin_username = info.username
+        response = data.split(':')[1]
+        user_id = response.split(' ')[0]
+        status = response.split(' ')[1]       
+        try:
+            await callback_query.message.edit_text(f"impostato da @{admin_username}")
+            if status == '✅':
+                keyboard = self.keyboards.account_info()
+                self.db.insert_temp_user_data(user_id, None)       
+                await bot.send_message(admin_id, "Invia le chiavi all'utente:", reply_markup=keyboard)
+            else:
+                await bot.send_message(user_id, "Your account non è stato creato")
+        except Exception as ex:
+            logger.error(f"Errore durante l'esecuzione di handle_set_state: {ex}", exc_info=True)
+            await self.bot.send_message(self.admin_id, f"{ex}")
+            
+    async def webapp_recive_keys(self, message: Message, state: FSMContext):
+        user_id = self.db.get_temp_user_data()
+        try:
+            result = json.loads(message.web_app_data.data)
+            account = result['account']
+            master_key = result['master']
+            active_key = result['active']
+            posting_key = result['posting']
+            format = (f"account: <pre language='c++'>{account}</pre>\n"
+            f"master_key: <pre language='c++'>{master_key}</pre>\n"
+            f"active_key: <pre language='c++'>{active_key}</pre>\n"
+            f"posting_key: <pre language='c++'>{posting_key}</pre>")
+            await bot.send_message(user_id, format)
+            self.db.delate_temp_user(user_id)
+        except Exception as ex:
+            logger.error(f"Errore durante l'esecuzione di handle_set_state: {ex}", exc_info=True)
+            await self.bot.send_message(self.admin_id, f"{ex}")
+
+    async def recive_keys(self, message: Message, state: FSMContext):
+        data = await state.get_data()
+        user_id = data[0]
+        try:
+            await message.send_copy(user_id)
+        except Exception as ex:
+            logger.error(f"Errore durante l'esecuzione di handle_set_state: {ex}", exc_info=True)
+            await self.bot.send_message(self.admin_id, f"{ex}")
+        
