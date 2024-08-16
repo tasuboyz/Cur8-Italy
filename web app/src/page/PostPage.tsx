@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import './PostPage.css'
 import { Telegram } from "@twa-dev/types";
 import { SOCKET_URL, URL } from './setup/config';
@@ -82,11 +82,11 @@ function PostingPage() {
             throw new Error('Errore durante l\'invio del messaggio');
         }
 
-        window.Telegram.WebApp.showPopup({
-            title: "Messaggio Inviato",
-            message: `Il tuo messaggio è stato inviato con successo!`,
-            buttons: [{ type: 'ok' }]
-        });
+        // window.Telegram.WebApp.showPopup({
+        //     title: "Messaggio Inviato",
+        //     message: `Il tuo messaggio è stato inviato con successo!`,
+        //     buttons: [{ type: 'ok' }]
+        // });
     } catch (error) {
         window.Telegram.WebApp.showPopup({
             title: "Errore",
@@ -103,6 +103,49 @@ function PostingPage() {
         setUserId(user.id);
     }
   };
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const imageBase64 = reader.result as string;
+            handleSubmit(imageBase64);
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (imageBase64: string) => {
+    const headers = {
+      "accept": "application/json",
+      "authorization": "Bearer my-secret",
+      "Content-Type": "application/json"
+    };
+    const body = JSON.stringify({ 
+      userId: userId,
+      image: imageBase64
+    });
+    try {
+      const response = await fetch(`${URL}/image`, {
+        method: 'POST',
+        headers: headers,
+        body: body
+      });
+      if (!response.ok) {
+        throw new Error('Errore durante l\'invio dell\'immagine');
+      }
+      const data = await response.json(); // Aggiungi questa riga per ottenere il dato restituito
+      window.Telegram.WebApp.showPopup({
+        title: "Messaggio Inviato",
+        message: `Immagine inviata con successo! Dato restituito: ${JSON.stringify(data)}`, // Visualizza il dato restituito
+        buttons: [{ type: 'ok' }]
+      });
+    } catch (error) {
+      console.error('Errore durante l\'invio dell\'immagine:', error);
+    }
+  };  
 
 React.useEffect(() => {
     getUserInfo();
@@ -257,6 +300,7 @@ React.useEffect(() => {
       ))}
       </div>
       <button onClick={() => { scrollList(); inviaComando(); }}>Scorri Elenco e Invia Comando</button>
+      <input type="file" onChange={handleImageChange} />
       {/* Bottone di invio post */}
       <button className="button" onClick={inviaMessaggio}>Send Post</button>
     </div>
