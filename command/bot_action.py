@@ -47,7 +47,7 @@ class BotCommand:
         while True:
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
-            if current_time[:2] == '18':
+            if current_time[:2] == '17':
                 await self.send_report()
             await asyncio.sleep(3600)
 
