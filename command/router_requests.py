@@ -2,15 +2,38 @@ from .basic.db import Database
 from aiohttp import web
 from .basic.instance import bot
 from .basic.steem_request import Blockchain
+from .basic.image import FileManager, FileInfo
+from .basic.logger_config import logger
+import os
 
 class Router_Requests:
     def __init__(self):
         self.db = Database()
         self.connected_clients = set()
         self.steem = Blockchain()
+        self.image = FileManager()
 
     async def handle(self, request):
         return web.FileResponse('./dist/index.html')
+    
+    async def recive_base64_image(self, request: web.Request):
+        try:
+            data = await request.json()
+            userId = data.get('userId')
+            base64_string = data.get('image')
+            image_path = self.image.decode_and_save_image(base64_string)
+            file_info = FileInfo(image_path)
+            extention = file_info.extention
+            result = self.db.get_user_account(userId)
+            account = result[0]
+            wif = result[1]
+            link = self.steem.steem_upload_image(image_path, account, wif)
+            image_url = f"{link['url']}.{extention}"
+            os.remove(image_path)
+            return web.json_response(image_url)
+        except Exception as e:
+            logger.error(f"Errore durante la gestione della richiesta POST: {e}")
+            return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
     
     async def send_logged_data(self, request: web.Request):
         try:
@@ -20,7 +43,7 @@ class Router_Requests:
             if result:
                 return web.json_response({'status': 'success', 'message': 'Login effettuato'})
         except Exception as e:
-            print(f"Errore durante la gestione della richiesta POST: {e}")
+            logger.error(f"Errore durante la gestione della richiesta POST: {e}")
             return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
         
     async def send_community_data(self, request: web.Request):
