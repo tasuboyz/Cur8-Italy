@@ -139,7 +139,7 @@ function PostingPage() {
       const data = await response.json(); 
       const jsonString = JSON.stringify(data);
       const stringWithoutQuotes = jsonString.replace(/"/g, '');
-      setDescription(stringWithoutQuotes);
+      setDescription(prevDescription => prevDescription + '\n' + stringWithoutQuotes);
       // window.Telegram.WebApp.showPopup({
       //   title: "Messaggio Inviato",
       //   message: `Immagine inviata con successo! Dato restituito: ${JSON.stringify(data)}`,
