@@ -1,7 +1,6 @@
-﻿import io
-import os
-import time
-import random
+﻿import os
+import base64
+from io import BytesIO
 import uuid
 import glob
 from aiogram.fsm.context import FSMContext
@@ -20,6 +19,7 @@ class FileManager:
         self.bot = instance.bot
         self.admin_id = config.admin_id
         self.lang = Language()
+        self.directory_path = f"UserImage"
 
     def check_file_exists(self, file_path):
         while os.path.exists(file_path):
@@ -46,11 +46,10 @@ class FileManager:
                 file_extension = file_path.split(".")[-1]    
                 file_name = f"{uid}.{file_extension}"  
 
-                directory_path = f"UserImage"
-                if not os.path.exists(directory_path):
-                    os.makedirs(directory_path)
+                if not os.path.exists(self.directory_path):
+                    os.makedirs(self.directory_path)
 
-                download_path = os.path.join(directory_path, file_name)
+                download_path = os.path.join(self.directory_path, file_name)
                 file_path = self.check_file_exists(file_path)
 
                 await self.bot.download_file(file_path, download_path)
@@ -108,7 +107,19 @@ class FileManager:
             return link
         else:
             raise Exception(response.reason)
-            
+        
+    def decode_and_save_image(self, base64_string: str):
+        if "," in base64_string:
+            base64_string = base64_string.split(",")[1]
+        image_data = base64.b64decode(base64_string)
+        image = BytesIO(image_data)
+        img = Image.open(image)
+        if not os.path.exists(self.directory_path):
+            os.makedirs(self.directory_path)
+        image_name = self.directory_path + r"/" + f"{uuid.uuid4()}.png"
+        img.save(image_name)
+        return image_name
+    
 class FileInfo: # crea una classe per gestire i colori e le impostazioni del QR
     def __init__(self, file_name):
         self.nome_completo = os.path.basename(file_name).split(".")[0]
