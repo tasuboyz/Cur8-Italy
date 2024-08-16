@@ -14,9 +14,6 @@ from .config import admin_id
 from .language import Language
 from beem.vote import Vote
 
-steem = Steem()
-blockchain = Blockchain(steem_instance=steem)
-
 class Blockchain:
     def __init__(self, mode='irreversible'):
         self.mode = mode
@@ -210,7 +207,7 @@ class Blockchain:
         
 ##################################################################################### Community command
         
-    def get_steem_community(self, community_name):
+    def get_steem_community(self, community_name=''):
         result = self.community.search_title(community_name)
         return result
     

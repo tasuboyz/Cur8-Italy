@@ -5,11 +5,13 @@ from .user import UserInfo
 from aiogram import Bot
 from .db import Database
 from .language import Language
+from .config import BASE_WEBHOOK_URL
 
 class Keyboard_Manager:
     def __init__(self):
         self.db = Database()
-        self.postpage_url = 'https://tasuboyz.github.io/Posting-Web-App/'
+        #self.postpage_url = 'https://tasuboyz.github.io/Posting-Web-App/'
+        self.postpage_url = BASE_WEBHOOK_URL
         self.loginpage_url = 'https://tasuboyz.github.io/login-page/'      
         self.SignIn_url = 'https://tasuboyz.github.io/Sign-In/'
         self.Account_Set_Url = 'https://tasuboyz.github.io/Account-Info/'
