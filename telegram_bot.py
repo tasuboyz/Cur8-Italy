@@ -28,6 +28,7 @@ class BOT():
         self.app.router.add_get('/', self.request_hendle.handle)
         self.app.router.add_static('/assets/', path='./dist/assets', name='assets')
         self.app.router.add_post('/post', self.request_hendle.handle_post)
+        self.app.router.add_post('/image', self.request_hendle.recive_base64_image)
         self.app.router.add_post('/logged', self.request_hendle.send_logged_data)
         self.app.router.add_post('/login', self.request_hendle.handle_login)
         self.app.router.add_post('/community', self.request_hendle.send_community_data)
