@@ -136,12 +136,15 @@ function PostingPage() {
       if (!response.ok) {
         throw new Error('Errore durante l\'invio dell\'immagine');
       }
-      const data = await response.json(); // Aggiungi questa riga per ottenere il dato restituito
-      window.Telegram.WebApp.showPopup({
-        title: "Messaggio Inviato",
-        message: `Immagine inviata con successo! Dato restituito: ${JSON.stringify(data)}`, // Visualizza il dato restituito
-        buttons: [{ type: 'ok' }]
-      });
+      const data = await response.json(); 
+      const jsonString = JSON.stringify(data);
+      const stringWithoutQuotes = jsonString.replace(/"/g, '');
+      setDescription(stringWithoutQuotes);
+      // window.Telegram.WebApp.showPopup({
+      //   title: "Messaggio Inviato",
+      //   message: `Immagine inviata con successo! Dato restituito: ${JSON.stringify(data)}`,
+      //   buttons: [{ type: 'ok' }]
+      // });
     } catch (error) {
       console.error('Errore durante l\'invio dell\'immagine:', error);
     }
