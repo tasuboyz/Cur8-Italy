@@ -20,24 +20,16 @@ async def on_startup(bot: Bot) -> None:
     await bot.delete_webhook()
     await bot.set_webhook(f"{BASE_WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
 
-async def on_shutdown(dp):
+async def on_shutdown():
     await bot.delete_webhook()
-
-async def handle(request):
-    return web.FileResponse('./dist/index.html')
 
 async def main():
     try:
-        app = web.Application()
         my_bot.dp.startup.register(on_startup)
         my_bot.dp.include_router(my_bot.router)
 
-        app.router.add_get('/', handle)
-        app.router.add_static('/assets/', path='./dist/assets', name='assets')
-
         command = BotCommand()
         asyncio.create_task(command.post_programmed())
-        asyncio.create_task(command.time_check())
         asyncio.create_task(command.send_post_link())
         
         webhook_requests_handler = SimpleRequestHandler(
@@ -45,15 +37,16 @@ async def main():
             bot=bot,
             secret_token=WEBHOOK_SECRET,
         )
-        webhook_requests_handler.register(app, path=WEBHOOK_PATH)
+        webhook_requests_handler.register(my_bot.app, path=WEBHOOK_PATH)
 
-        setup_application(app, my_bot.dp, bot=bot)
+        setup_application(my_bot.app, my_bot.dp, bot=bot)
 
-        runner = web.AppRunner(app)
+        runner = web.AppRunner(my_bot.app)
         await runner.setup()
         site = web.TCPSite(runner, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
         await site.start()
-
+        
+        asyncio.create_task(command.time_check())
         print(f"Server running at http://{WEB_SERVER_HOST}:{WEB_SERVER_PORT}")
         while True:
             await asyncio.sleep(3600)

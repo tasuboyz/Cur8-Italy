@@ -11,6 +11,8 @@ import asyncio
 from datetime import datetime
 from command.basic.memory import Form
 from command.basic.language import Language
+from command.router_requests import Router_Requests
+from aiohttp import web
 
 class BOT():
     def __init__(self):
@@ -19,6 +21,17 @@ class BOT():
         self.command = User_Commands()
         self.language = Language()
         self.router = Router()
+        self.app = web.Application()
+        self.request_hendle = Router_Requests()
+
+        #app route
+        self.app.router.add_get('/', self.request_hendle.handle)
+        self.app.router.add_static('/assets/', path='./dist/assets', name='assets')
+        self.app.router.add_post('/post', self.request_hendle.handle_post)
+        self.app.router.add_post('/logged', self.request_hendle.send_logged_data)
+        self.app.router.add_post('/login', self.request_hendle.handle_login)
+        self.app.router.add_post('/community', self.request_hendle.send_community_data)
+        self.app.router.add_get('/ws', self.request_hendle.websocket_handler)
 
         #admin command
         self.router.message(Command('user'))(self.admin_command.admin_panel_commands)  
@@ -32,6 +45,7 @@ class BOT():
         self.router.message(Form.set_keys, F.text)(self.admin_command.recive_keys)
         
         self.router.message(Form.set_keys, F.web_app_data)(self.admin_command.webapp_recive_keys)
+        
         #command
         self.router.message(CommandStart())(self.command.command_start_handler)   
         self.router.message(Command('help'))(self.command.send_tutorial)
