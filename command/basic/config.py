@@ -1,7 +1,6 @@
 import logging
 
-TOKEN = "6348055484:AAGhOv6sx5B4acQj-XUfRWV3kJz53FvioWs" #TasuAdmin
-#TOKEN = '7122531030:AAGK6dDoGpeDSShlTuJnbXEJkmXZpV6m06s' #token produzione
+TOKEN = "" 
 
 admin_id = 1026795763
 
