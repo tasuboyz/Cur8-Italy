@@ -1,314 +1,175 @@
 import React, { ChangeEvent } from 'react';
-import './PostPage.css'
-import { Telegram } from "@twa-dev/types";
-import { SOCKET_URL, URL } from './setup/config';
-
-declare global {
-  interface Window {
-    Telegram: Telegram;
-  }
-}
+import './PostPage.css';
+import { usePost } from './hooks/usePost';
+import { TitleInput } from '../components/Form/TitleInput';
+//import { CommunityInput } from '../components/Form/CommunityInput';
+import { DescriptionInput } from '../components/Form/DescriptionInput';
+import { TagInput } from '../components/Form/TagInput';
+import { DateTimePicker } from '../components/Form/DateTimePicker';
+import { SubmitButton } from '../components/Form/SubmitButton';
+import useUser from './contexts/useUser';
+import { postAPI } from './api/postAPI';
+import { useNavigate } from 'react-router-dom';
 
 function PostingPage() {
+  
   const [titolo, setTitolo] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [tag, setTag] = React.useState('steemit steemexclusive');
   const [dateTime, setDateTime] = React.useState('');
-  const [userId, setUserId] = React.useState<number | null>(null);
-  const [webSocketData, setWebSocketData] = React.useState([]);
-  // const [showContextMenu, setShowContextMenu] = useState(false);
-  // const [initData, setInitData] = useState('');
+  const { user } = useUser();
+  // const [community, setCommunity] = React.useState('');
+  // const [listItems, setListItems] = React.useState<string[]>([]);
+  // const [selectedItem, setSelectedItem] = React.useState<string | null>(null);
+  const { sendMessage, loading } = usePost();
+  const navigate = useNavigate();
+
+  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTitolo(event.target.value);
+  };
+
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(event.target.value);
+  };
+
+  const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTag(event.target.value);
+  };
+
+  const handleDateTimeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDateTime(event.target.value);
+  };
+
+  // const handleCommunityChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setCommunity(event.target.value);
+  // };
+
+  // const handleButtonClick = async () => {
+  //   try {
+  //     const response = await postAPI.searchCommunity(community);
+  //     const data = await response.data;
+  //     setListItems(data.map(item => item.name));
+  //   } catch (error) {
+  //     console.error('Error fetching list:', error);
+  //   }
+  // };
+
+  const handleButtonClick = async () => {
+    try {
+      navigate('/community-page');
+      return
+    } catch (error) {
+      console.error('Error fetching list:', error);
+    }
+  };
+
 
   const inviaMessaggio = async (): Promise<void> => {
-      const headers = {
-          "accept": "application/json",
-          "authorization": "Bearer my-secret",
-          "Content-Type": "application/json"
-      };
-
-      const post = {
-          title: titolo,
-          description: description,
-          tag: tag,
-          dateTime: dateTime,
-          userId: userId
-      };
-
-      try {
-          const response = await fetch(`${URL}/post`, {
-              method: 'POST',
-              headers: headers,
-              body: JSON.stringify(post)
-          });
-
-          if (!response.ok) {
-              throw new Error('Errore durante l\'invio del messaggio');
-          }
-
-          window.Telegram.WebApp.showPopup({
-              title: "Messaggio Inviato",
-              message: `Il tuo messaggio è stato inviato con successo!`,
-              buttons: [{ type: 'ok' }]
-          });
-      } catch (error) {
-          window.Telegram.WebApp.showPopup({
-              title: "Errore",
-              message: `Si è verificato un errore durante l'invio del messaggio ${error}`,
-              buttons: [{ type: 'ok' }]
-          });
-          console.error('Errore durante l\'invio del messaggio:', error);
-      }
-  };
-  
-  const inviaComando = async (): Promise<void> => {
-    const headers = {
-        "accept": "application/json",
-        "authorization": "Bearer my-secret",
-        "Content-Type": "application/json"
-    };
-
     const post = {
-        command: "command: community"
+      title: titolo,
+      description: description,
+      tag: tag,
+      dateTime: dateTime,
+      userId: user.userId
     };
 
-    try {
-        const response = await fetch(`${URL}/community`, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(post)
-        });
-
-        if (!response.ok) {
-            throw new Error('Errore durante l\'invio del messaggio');
-        }
-
-        // window.Telegram.WebApp.showPopup({
-        //     title: "Messaggio Inviato",
-        //     message: `Il tuo messaggio è stato inviato con successo!`,
-        //     buttons: [{ type: 'ok' }]
-        // });
-    } catch (error) {
-        window.Telegram.WebApp.showPopup({
-            title: "Errore",
-            message: "Si è verificato un errore durante l'invio del messaggio.",
-            buttons: [{ type: 'ok' }]
-        });
-        console.error('Errore durante l\'invio del messaggio:', error);
-    }
-};
-
-  const getUserInfo = () => {
-    const user = window.Telegram.WebApp.initDataUnsafe.user;
-    if (user) {
-        setUserId(user.id);
-    }
+    await sendMessage(post);
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const imageBase64 = reader.result as string;
-            handleSubmit(imageBase64);
-        };
-        reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageBase64 = reader.result as string;
+        handleSubmit(imageBase64);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
+  React.useEffect(() => {
+    const savedTags = localStorage.getItem('tags');
+    if (savedTags) {
+      setTag(savedTags);
+    }
+    const savedTitle = localStorage.getItem('title');
+    if (savedTitle) {
+      setTitolo(savedTitle);
+    }
+    const savedDescription = localStorage.getItem('description');
+    if (savedDescription) {
+      setDescription(savedDescription);
+    }
+    const savedDateTime = localStorage.getItem('dateTime');
+    if (savedDateTime) {
+      setDateTime(savedDateTime);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    localStorage.setItem('title', titolo);
+  }, [titolo]);
+
+  React.useEffect(() => {
+    localStorage.setItem('description', description);
+  }, [description]);
+
+  React.useEffect(() => {
+    localStorage.setItem('tags', tag);
+  }, [tag]);
+
+  interface Upload {
+    userId: number | null;
+    imageBase64: string;
+  }
+
   const handleSubmit = async (imageBase64: string) => {
-    const headers = {
-      "accept": "application/json",
-      "authorization": "Bearer my-secret",
-      "Content-Type": "application/json"
+    const upload: Upload = {
+      userId: user.userId,
+      imageBase64: imageBase64
     };
-    const body = JSON.stringify({ 
-      userId: userId,
-      image: imageBase64
-    });
+
     try {
-      const response = await fetch(`${URL}/image`, {
-        method: 'POST',
-        headers: headers,
-        body: body
-      });
-      if (!response.ok) {
-        throw new Error('Errore durante l\'invio dell\'immagine');
+      const response = await postAPI.uploadImage(upload);
+
+      if (response.error) {
+        throw new Error(response.error);
       }
-      const data = await response.json(); 
+
+      const data = response.data;
       const jsonString = JSON.stringify(data);
       const stringWithoutQuotes = jsonString.replace(/"/g, '');
       setDescription(prevDescription => prevDescription + '\n' + stringWithoutQuotes);
-      // window.Telegram.WebApp.showPopup({
-      //   title: "Messaggio Inviato",
-      //   message: `Immagine inviata con successo! Dato restituito: ${JSON.stringify(data)}`,
-      //   buttons: [{ type: 'ok' }]
-      // });
     } catch (error) {
       console.error('Errore durante l\'invio dell\'immagine:', error);
     }
-  };  
-
-React.useEffect(() => {
-    getUserInfo();
-}, []);
-
-React.useEffect(() => {
-  const socket = new WebSocket(SOCKET_URL);
-
-  socket.onopen = () => {
-    window.Telegram.WebApp.showPopup({
-      title: "Connessione Stabilita",
-      message: "La connessione WebSocket è stata stabilita con successo!",
-      buttons: [{ type: 'ok' }]
-    });
-  };
-  
-  socket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      setWebSocketData(data); 
-      // window.Telegram.WebApp.showPopup({
-      //   title: "Messaggio Ricevuto",
-      //   message: `Dati ricevuti: ${JSON.stringify(data)}`,
-      //   buttons: [{ type: 'ok' }]
-      // });
-    } catch (error) {
-      window.Telegram.WebApp.showPopup({
-        title: "Errore di Parsing",
-        message: `Errore nel parsing del messaggio: ${error}`,
-        buttons: [{ type: 'ok' }]
-      });
-    }
   };
 
-  socket.onerror = (error) => {
-    window.Telegram.WebApp.showPopup({
-      title: "Errore WebSocket",
-      message: `Si è verificato un errore: ${error}`,
-      buttons: [{ type: 'ok' }]
-    });
-  };
-
-  socket.onclose = () => {
-    window.Telegram.WebApp.showPopup({
-      title: "Connessione Chiusa",
-      message: "La connessione WebSocket è stata chiusa.",
-      buttons: [{ type: 'ok' }]
-    });
-  };
-
-  return () => {
-    socket.close();
-  };
-}, []);
-
-const scrollList = () => {
-  const listElement = document.getElementById('list');
-  if (listElement) {
-    listElement.scrollBy(0, 100); // Scorre di 100px
-  }
-};
-
-React.useEffect(() => {
-  const savedTags = localStorage.getItem('tags');
-  if (savedTags) {
-    setTag(savedTags);
-  }
-  const savedTitle = localStorage.getItem('title');
-  if (savedTitle) {
-      setTitolo(savedTitle);
-  }
-  const savedDescription = localStorage.getItem('description');
-  if (savedDescription) {
-      setDescription(savedDescription);
-  }
-  const savedDateTime = localStorage.getItem('dateTime');
-    if (savedDateTime) {
-      setDateTime(savedDateTime);
-  }
-}, []);
-  
-React.useEffect(() => {
-    localStorage.setItem('title', titolo);
-}, [titolo]);
-
-React.useEffect(() => {
-    localStorage.setItem('description', description);
-}, [description]);
-  
-React.useEffect(() => {
-  localStorage.setItem('tags', tag);
-}, [tag]);
+  // const handleItemClick = (item: string) => {
+  //   setSelectedItem(item);
+  // };
 
   return (
-    <>
-      <div className="container">
-      {/* Casella della community
-      <input
-        type="text"
-        placeholder={initData}
-        className="input-community"
-        value={initData}
-        onChange={(e) => setInitData(e.target.value)}
-      /> */}
-      {/* Casella di input per il titolo */}
-      <input
-        type="text"
-        placeholder="Title"
-        className="input-title"
-        value={titolo}
-        onChange={(e) => setTitolo(e.target.value)}
-      />
-      {/* Casella di input per la descrizione */}
-      <textarea
-        placeholder="body of post"
-        className="input-description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        // onFocus={() => setShowFormatOptions(true)}
-        // onBlur={() => setShowFormatOptions(false)}
-        maxLength={15000}
-      />
-      {/* {showFormatOptions && (
-          <div className="format-options">
-            <button onClick={() => formatSelectedText('bold')}>Bold</button>
-            <button onClick={() => formatSelectedText('italic')}>Italic</button>
-            <button onClick={() => formatSelectedText('code')}>Code</button>
-          </div>
-      )} */}
-      {/* Casella di input per i tag */}
-      <input
-        type="text"
-        placeholder="Tag exaple: steem steemit steemexclusive"
-        className="input-tag"
-        value={tag}
-        onChange={(e) => {
-          const inputWords = e.target.value.split(' ');
-          if (inputWords.length <= 7) {
-            setTag(e.target.value);
-          }
-        }}
-      />
-      <input 
-        type="datetime-local" 
-        className="input-datetime" 
-        value={dateTime} 
-        onChange={(e) => setDateTime(e.target.value)} 
-      />
-      <div id="list" style={{ height: '100px', overflowY: 'scroll' }}>
-      {webSocketData.map((item, index) => (
-        <div key={index}>{item}</div>
-      ))}
+    <div className="container">
+      <div>
+        <TitleInput value={titolo} onChange={handleTitleChange} />
+        <DescriptionInput value={description} onChange={handleDescriptionChange} />
+        <TagInput value={tag} onChange={handleTagChange} />
+        <DateTimePicker value={dateTime} onChange={handleDateTimeChange} />
+        <input type="file" onChange={handleImageChange} />
+        <SubmitButton onClick={inviaMessaggio} loading={loading} />
+        {/* <CommunityInput
+          value={community}
+          onChange={handleCommunityChange}
+          communities={[]} // Passa qui la tua lista di comunità
+          onSelect={(community) => console.log('Community selected:', community)}
+        /> */}
+        <button onClick={handleButtonClick}>Search Community</button>
       </div>
-      <button onClick={() => { scrollList(); inviaComando(); }}>Scorri Elenco e Invia Comando</button>
-      <input type="file" onChange={handleImageChange} />
-      {/* Bottone di invio post */}
-      <button className="button" onClick={inviaMessaggio}>Send Post</button>
     </div>
-    </>
-  )
+  );
 }
 
-export default PostingPage
+export default PostingPage;

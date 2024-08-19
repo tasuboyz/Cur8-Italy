@@ -1,7 +1,7 @@
 import React from 'react';
-import './LoginPage.css'
+import './LoginPage.css';
 import { Telegram } from "@twa-dev/types";
-import { URL } from './setup/config';
+import { postAPI } from './api/postAPI';
 
 declare global {
   interface Window {
@@ -23,27 +23,17 @@ function LoginPage() {
   };
 
   const inviaMessaggio = async (): Promise<void> => {
-    const headers = {
-        "accept": "application/json",
-        "authorization": "Bearer my-secret",
-        "Content-Type": "application/json"
-    };
-
-    const post = {
+    const login_info = {
       userId: userId,
       account: account,
       wif: wif
     };
 
     try {
-        const response = await fetch(`${URL}/login`, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(post)
-        });
+        const response = await postAPI.login(login_info); // Usa il metodo submit di postAPI
 
-        if (!response.ok) {
-            throw new Error('Errore durante l\'invio del messaggio');
+        if (response.error) {
+            throw new Error(response.error);
         }
 
         window.Telegram.WebApp.showPopup({
@@ -55,7 +45,7 @@ function LoginPage() {
     } catch (error) {
         window.Telegram.WebApp.showPopup({
             title: "Errore",
-            message: `Si è verificato un errore durante l'invio del messaggio ${error}`,
+            message: `Si è verificato un errore durante l'invio del messaggio: ${error}`,
             buttons: [{ type: 'ok' }]
         });
         console.error('Errore durante l\'invio del messaggio:', error);
@@ -90,4 +80,4 @@ React.useEffect(() => {
   )
 }
 
-export default LoginPage
+export default LoginPage;
