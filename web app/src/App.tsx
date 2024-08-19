@@ -4,6 +4,7 @@ import LoginPage from './page/LoginPage';
 import PostingPage from './page/PostPage';
 import LoadingSpinner from './components/LoadingSpinner'; // Assicurati di creare questo componente
 import { Telegram } from "@twa-dev/types";
+import CommunityPage from './page/CommunityPage';
 
 declare global {
   interface Window {
@@ -59,6 +60,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={isLoggedIn ? <Navigate to="/post" /> : <LoginPage />} />
         <Route path="/post" element={isLoggedIn ? <PostingPage /> : <Navigate to="/" />} />
+        <Route path="/community-page" element={<CommunityPage />} />
       </Routes>
     </Router>
   );
