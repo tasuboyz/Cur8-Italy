@@ -22,7 +22,7 @@ WEBHOOK_PATH = r"/webhook"
 
 WEBHOOK_SECRET = "my-secret"
 
-BASE_WEBHOOK_URL = "https://8161-240b-10-5e2-1800-d4bb-e0e2-2c6-856d.ngrok-free.app"
+BASE_WEBHOOK_URL = ""
 
 # cur8_channel = '@test_sniper_cur8'
 
