@@ -1,0 +1,54 @@
+.title-input-container {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.title-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1.2rem;
+  color: #E1E1E6;
+  background-color: #202024;
+  border: 2px solid #323238;
+  border-radius: 0.5rem;
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-sizing: border-box;
+}
+
+.title-input:focus {
+  border-color: #8257E5;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(130, 87, 229, 0.25);
+}
+
+.title-input::placeholder {
+  color: #999;
+}
+
+.character-count {
+  position: absolute;
+  bottom: -1.2rem;
+  right: 0.5rem;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+@media (prefers-color-scheme: light) {
+  .title-input {
+    color: #323238;
+    background-color: #fff;
+    border-color: #ccc;
+  }
+
+  .title-input:focus {
+    border-color: #8257E5;
+    box-shadow: 0 0 0 3px rgba(130, 87, 229, 0.25);
+  }
+}
+
+@media (max-width: 600px) {
+  .title-input {
+    font-size: 1rem;
+    padding: 0.6rem 0.8rem;
+  }
+}

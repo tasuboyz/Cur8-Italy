@@ -1,0 +1,50 @@
+.form-group {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.input-description {
+  width: 400px;
+  height: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #E1E1E6;
+  background-color: #202024;
+  border: 1px solid #323238;
+  border-radius: 0.25rem;
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.input-description:focus {
+  border-color: #8257E5;
+  outline: 0;
+  box-shadow: 0 0 8px rgba(130, 87, 229, 0.6);
+}
+
+.input-description::placeholder {
+  color: #999;
+}
+
+.character-count {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+@media (prefers-color-scheme: light) {
+  .input-description {
+    color: #323238;
+    background-color: #fff;
+    border-color: #ccc;
+  }
+}
+
+@media (max-width: 600px) {
+  .input-description {
+    font-size: 16px; /* Prevents zooming on iOS */
+  }
+}
