@@ -18,6 +18,15 @@ function PostingPage() {
   const [tag, setTag] = React.useState('steemit steemexclusive');
   const [dateTime, setDateTime] = React.useState('');
   const { user } = useUser();
+  const [communityId, setCommunityId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    // Recuperiamo l'ID della community dal localStorage
+    const savedCommunityId = localStorage.getItem('selectedCommunityId');
+    if (savedCommunityId) {
+      setCommunityId(savedCommunityId);
+    }
+  }, []);
   // const [community, setCommunity] = React.useState('');
   // const [listItems, setListItems] = React.useState<string[]>([]);
   // const [selectedItem, setSelectedItem] = React.useState<string | null>(null);
@@ -63,18 +72,24 @@ function PostingPage() {
     }
   };
 
-
   const inviaMessaggio = async (): Promise<void> => {
     const post = {
       title: titolo,
       description: description,
       tag: tag,
       dateTime: dateTime,
-      userId: user.userId
+      userId: user.userId,
+      communityId: communityId
     };
-
+  
     await sendMessage(post);
+  
+    localStorage.removeItem('title');
+    localStorage.removeItem('description');
+
+    window.Telegram.WebApp.close();
   };
+  
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -154,6 +169,7 @@ function PostingPage() {
   return (
     <div className="container">
       <div>
+      <button onClick={handleButtonClick}>Search Community</button>
         <TitleInput value={titolo} onChange={handleTitleChange} />
         <DescriptionInput value={description} onChange={handleDescriptionChange} />
         <TagInput value={tag} onChange={handleTagChange} />
@@ -165,8 +181,7 @@ function PostingPage() {
           onChange={handleCommunityChange}
           communities={[]} // Passa qui la tua lista di comunità
           onSelect={(community) => console.log('Community selected:', community)}
-        /> */}
-        <button onClick={handleButtonClick}>Search Community</button>
+        /> */}   
       </div>
     </div>
   );

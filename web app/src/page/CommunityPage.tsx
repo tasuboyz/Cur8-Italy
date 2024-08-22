@@ -1,8 +1,8 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React from 'react';
+import './CommunityPage.css';
 import { Telegram } from "@twa-dev/types";
+import { Box, List, ListItem, ListItemText, Container, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { CommunityInput } from '../components/Form/CommunityInput';
-import { postAPI } from './api/postAPI';
 
 declare global {
   interface Window {
@@ -10,99 +10,115 @@ declare global {
   }
 }
 
-interface Community {
-  id: string;
-  name: string;
-}
-
-const CommunityPage: React.FC = () => {
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
-  const [showList, setShowList] = useState(false);
+function PostingPage() {
+  const [communityNames, setCommunityNames] = React.useState<Array<string>>([]);
+  const [community, setCommunity] = React.useState<string>('');
   const navigate = useNavigate();
-  const [community, setCommunity] = useState('');
 
-  useEffect(() => {
+  const SearchCommunity = React.useCallback(async (): Promise<void> => {
+    const headers = {
+        "accept": "application/json",
+        "authorization": "Bearer my-secret",
+        "Content-Type": "application/json"
+    };
+
+    const post = {
+      community: community
+    };
+
+    try {
+        const response = await fetch(`/community`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(post)
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore durante l\'invio del messaggio');
+        }
+        const data = await response.json(); 
+        // const parsedCommunities = data.data.map((item: string) => {
+        //   const [id, name] = item.split(',');
+        //   console.log(id)
+        //   return data.data;
+        // });
+        setCommunityNames(data.data);
+    } catch (error) {
+        window.Telegram.WebApp.showPopup({
+            title: "Errore",
+            message: "Si è verificato un errore durante l'invio del messaggio.",
+            buttons: [{ type: 'ok' }]
+        });
+        console.error('Errore durante l\'invio del messaggio:', error);
+    }
+  }, [community]);
+
+  React.useEffect(() => {
     window.Telegram.WebApp.BackButton.show();
 
     window.Telegram.WebApp.BackButton.onClick(() => {
       window.Telegram.WebApp.BackButton.hide();
       navigate('/post');
-    });    
-   
-  }, [navigate]);
+    });
 
-  const fetchCommunities = async () => {
-    try {
-      const response = await postAPI.searchCommunity('');
+    SearchCommunity();
+    scrollList();
+  }, [navigate, SearchCommunity]);
 
-      if (response.error) {
-        throw new Error(response.error);
-      }
-
-      const data = response.data;
-      const firstFiveItems = data.slice(0, 5).map(item => item.name).join(', ');
-      window.Telegram.WebApp.showPopup({
-        title: "Comunità selezionata",
-        message: `Hai selezionato: ${firstFiveItems}`,
-        buttons: [{ type: 'ok' }]
-      });
-      setCommunities(data);
-    } catch (error) {
-      console.error('Errore durante il fetch delle comunità:', error);
+  const scrollList = () => {
+    const listElement = document.getElementById('list');
+    if (listElement) {
+      listElement.scrollBy(0, 100); // Scorre di 100px
     }
   };
 
-  const handleCommunityChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCommunityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCommunity(event.target.value);
   };
 
-  const handleCommunitySelect = (community: Community) => {
-    setSelectedCommunity(community);
-    window.Telegram.WebApp.showPopup({
-      title: "Comunità selezionata",
-      message: `Hai selezionato: ${community.name}`,
-      buttons: [{ type: 'ok' }]
-    });
-  };
+  // const handleCommunitySelect = (selectedName: string) => {
+  //   setCommunity(selectedName);
+  // };
 
-  const handleShowList = () => {
-    fetchCommunities();
-    setShowList(true);
+  const handleCommunitySelect = (selectedName: string, selectedId: string) => {
+    setCommunity(selectedName);
+    localStorage.setItem('selectedCommunityId', selectedId);
+    navigate('/post');
   };
 
   return (
-    <div>
-      <h1>Seleziona una Comunità</h1>
-      <CommunityInput
-        value={community}
-        onChange={handleCommunityChange}
-        communities={[]} // Passa qui la tua lista di comunità
-        onSelect={(community) => console.log('Community selected:', community)}
-      />
-      <button onClick={handleShowList}>Mostra Elenco</button>
-      {showList && (
-        <div className="scrollable-list">
-          <ul>
-            {communities.map((community) => (
-              <li
-                key={community.id}
-                className={selectedCommunity?.id === community.id ? 'selected' : ''}
-                onClick={() => handleCommunitySelect(community)}
-              >
-                {community.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {selectedCommunity && (
-        <div>
-          <h2>Comunità selezionata: {selectedCommunity.name}</h2>
-        </div>
-      )}
+    <div className="container">
+    <Container>
+      <Box className="container" sx={{ padding: 2 }}>
+        <TextField
+          label="Search Community"
+          value={community}
+          onChange={handleCommunityChange}
+          fullWidth
+          variant="outlined"
+          className="community-search"
+        />
+        <Box id="list" sx={{ height: '400px', overflowY: 'scroll', marginTop: 2 }}>
+          <List>
+          {communityNames.map((item, index) => {
+          const [id, name] = item.split(',');
+          return (
+            <ListItem button key={index} onClick={() => handleCommunitySelect(name, id)}>
+              <ListItemText primary={name} />
+            </ListItem>
+            );
+          })}
+            {/* {communityNames.map((name, index) => (
+              <ListItem button key={index} onClick={() => handleCommunitySelect(name)}>
+                <ListItemText primary={name} />
+              </ListItem>
+            ))} */}
+          </List>
+        </Box>
+      </Box>
+    </Container>
     </div>
   );
-};
+}
 
-export default CommunityPage;
+export default PostingPage;
