@@ -5,6 +5,9 @@ from .basic.steem_request import Blockchain
 from .basic.image import FileManager, FileInfo
 from .basic.logger_config import logger
 import os
+from .basic.config import admin_id
+import json
+from .basic.config import BASE_WEBHOOK_URL
 
 class Router_Requests:
     def __init__(self):
@@ -19,8 +22,9 @@ class Router_Requests:
     async def recive_base64_image(self, request: web.Request):
         try:
             data = await request.json()
+            data = json.loads(data)
             userId = data.get('userId')
-            base64_string = data.get('image')
+            base64_string = data.get('imageBase64')
             image_path = self.image.decode_and_save_image(base64_string)
             file_info = FileInfo(image_path)
             extention = file_info.extention
@@ -32,6 +36,8 @@ class Router_Requests:
             os.remove(image_path)
             return web.json_response(image_url)
         except Exception as e:
+            await bot.send_message(userId, str(e))
+            await bot.send_message(admin_id, str(e))
             logger.error(f"Errore durante la gestione della richiesta POST: {e}")
             return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
     
@@ -43,20 +49,22 @@ class Router_Requests:
             if result:
                 return web.json_response({'status': 'success', 'message': 'Login effettuato'})
         except Exception as e:
+            await bot.send_message(userId, str(e))
+            await bot.send_message(admin_id, str(e))
             logger.error(f"Errore durante la gestione della richiesta POST: {e}")
             return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
         
     async def send_community_data(self, request: web.Request):
         inline_results = []
-        community = self.steem.get_steem_community()
+        data = await request.json()
+        # data = json.loads(data)
+        community_name = data.get('community')
+        community = self.steem.get_steem_community(community_name)
         for result in community:
             name = result['name']
             title = result['title']
             description = result['about']
             inline_results.append(f"{name},{title}")
-        if self.connected_clients:
-            for client in self.connected_clients:
-                await client.send_json(inline_results)
         return web.json_response({'status': 'success', 'message': 'Dati ricevuti con successo', 'data': inline_results})
 
     async def websocket_handler(self, request):
@@ -77,13 +85,15 @@ class Router_Requests:
     async def handle_post(self, request: web.Request):
         try:
             data = await request.json()
+            data = json.loads(data)
             userId = data.get('userId')
             title = data.get('title')
             description = data.get('description')
             tag = data.get('tag')
             dateTime = data.get('dateTime')
+            communityId = data.get('communityId')
             
-            text = f"Title: {title}, Description: {description}, Tag: {tag}, DateTime: {dateTime}"
+            text = f"Title: {title}, Description: {description}, Tag: {tag}, DateTime: {dateTime}, communityId: {communityId}"
             await bot.send_message(userId, text)
             #print(f"user_id: {userId}, Title: {title}, Description: {description}, Tag: {tag}, DateTime: {dateTime}")
             
@@ -95,6 +105,7 @@ class Router_Requests:
     async def handle_login(self, request: web.Request):
         try:
             data = await request.json()
+            data = json.loads(data)
             userId = data.get('userId')
             account = data.get('account')
             wif = data.get('wif')
@@ -111,4 +122,7 @@ class Router_Requests:
         except Exception as e:
             print(f"Errore durante la gestione della richiesta POST: {e}")
             return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
-        
+    
+    def get_assets_url(self, request: web.Request):
+        assets_url = os.getenv(BASE_WEBHOOK_URL, '/assets/')
+        return web.json_response({'assets_url': BASE_WEBHOOK_URL})
