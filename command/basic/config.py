@@ -24,6 +24,14 @@ WEBHOOK_SECRET = "my-secret"
 
 BASE_WEBHOOK_URL = ""
 
+ngrok_auth = "2Z1tsHdF5l2g4Slv6ICPPIJNL7k_6MUTNq4LhqaYgi9cV1qsw"
+
+ngrok.set_auth_token(ngrok_auth)
+
+http_tunnel = ngrok.connect(5173) 
+
+url_ngrok = http_tunnel.public_url
+
 # cur8_channel = '@test_sniper_cur8'
 
 # report_channel = '@cur8earn'
