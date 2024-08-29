@@ -39,7 +39,8 @@ class User_Commands:
         try:
             welcame_text = self.language.welcome_message(first_name, language_code)
             self.db.insert_user_data(user_id=user_id, username=username)
-            keyboard = self.keyboards.create_start_reply_keyboard(message)
+            #keyboard = self.keyboards.create_start_reply_keyboard(message)
+            keyboard = self.keyboards.open_web_app()
             await message.answer(welcame_text, reply_markup=keyboard)
         except Exception as ex:
             logger.error(ex, exc_info=True)
@@ -114,7 +115,7 @@ class User_Commands:
                     set_account_text = self.language.set_account_password(language_code)
                     await message.answer(set_account_text)
             elif 'wif' in data:                
-                author = data['account']
+                author = data['account'].lower()
                 wif = data['wif']
                 result = self.steem.steem_logging(language_code, user_id, author, wif)
                 account_logged_text = self.language.login_successful(language_code)

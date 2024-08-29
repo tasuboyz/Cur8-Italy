@@ -7,7 +7,11 @@ from .basic.logger_config import logger
 import os
 from .basic.config import admin_id
 import json
-from .basic.config import BASE_WEBHOOK_URL
+from .basic.config import BASE_WEBHOOK_URL, TEST, cur8_channel
+from .basic.language import Language
+import asyncio
+from datetime import datetime
+from .basic.chat_keyboards import Keyboard_Manager
 
 class Router_Requests:
     def __init__(self):
@@ -15,6 +19,8 @@ class Router_Requests:
         self.connected_clients = set()
         self.steem = Blockchain()
         self.image = FileManager()
+        self.language = Language()
+        self.keyboards = Keyboard_Manager()
 
     async def handle(self, request):
         return web.FileResponse('./dist/index.html')
@@ -32,9 +38,15 @@ class Router_Requests:
             account = result[0]
             wif = result[1]
             link = self.steem.steem_upload_image(image_path, account, wif)
-            image_url = f"{link['url']}.{extention}"
-            os.remove(image_path)
-            return web.json_response(image_url)
+            
+            os.remove(image_path)           
+            if 'url' in link:
+                image_url = f"{link['url']}.{extention}"
+                return web.json_response(image_url)
+            else:
+                await bot.send_message(userId, link)
+                return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
+    
         except Exception as e:
             await bot.send_message(userId, str(e))
             await bot.send_message(admin_id, str(e))
@@ -88,15 +100,43 @@ class Router_Requests:
             data = json.loads(data)
             userId = data.get('userId')
             title = data.get('title')
-            description = data.get('description')
-            tag = data.get('tag')
+            body = data.get('description')
+            tags = data.get('tag')
             dateTime = data.get('dateTime')
             communityId = data.get('communityId')
-            
-            text = f"Title: {title}, Description: {description}, Tag: {tag}, DateTime: {dateTime}, communityId: {communityId}"
-            await bot.send_message(userId, text)
-            #print(f"user_id: {userId}, Title: {title}, Description: {description}, Tag: {tag}, DateTime: {dateTime}")
-            
+            result = self.db.get_user_account(userId)
+            wif = result[1]
+            author = result[0]
+            language_code = self.db.get_language_code(userId)
+
+            # Check if dateTime is earlier than the current time
+            if dateTime and datetime.fromisoformat(dateTime) < datetime.now():
+                date_time_error_message = self.language.date_time_error_message(language_code)
+                await bot.send_message(userId, date_time_error_message)
+                return web.json_response({'status': 'error', 'message': 'dateTime cannot be earlier than the current time'}, status=399)
+
+            if dateTime == '':      
+                if TEST:                  
+                    text = f"Title: {title}, Description: {body}, Tag: {tags}, DateTime: {dateTime}, communityId: {communityId}"
+                    await bot.send_message(userId, text)
+                else:
+                    result = self.steem.pubblica_post(language_code, title=title, body=body, tags=tags, wif=wif, author=author, community=communityId)
+                    await bot.send_message(userId, result)
+                    await asyncio.sleep(20)
+                    post_info = self.steem.get_steem_posts(author)
+                    link = post_info['result'][0]['url']
+                    url = f'https://steemit.com{link}'
+                    # vote_keyboard = self.keyboards.vote_post(link)
+                    vote_keyboard = None
+                    
+                    channel_message = await bot.send_message(cur8_channel, url, reply_markup=vote_keyboard)
+                    await asyncio.sleep(3)
+                    cur8_channel_name = cur8_channel.replace('@', '')
+                    await bot.send_message(userId, f'https://t.me/{cur8_channel_name}/{channel_message.message_id}')
+            else:
+                self.db.insert_program_post_data(userId, dateTime, author, title, body, tags, communityId)
+                post_saved_message_text = self.language.post_saved_message(language_code, dateTime)
+                await bot.send_message(userId, post_saved_message_text)               
             return web.json_response({'status': 'success', 'message': 'Dati ricevuti con successo'})
         except Exception as e:
             print(f"Errore durante la gestione della richiesta POST: {e}")
@@ -114,11 +154,15 @@ class Router_Requests:
                 language_code = 'en'
             
             result = self.steem.steem_logging(language_code, userId, account, wif)
-            self.db.insert_user_account(userId, account, wif)
-            text = f"account: {account}, wif: {wif}"
-            await bot.send_message(userId, result)
-
-            return web.json_response({'status': 'success', 'message': 'Login effettuato con successo'})
+            account_logged_text = self.language.login_successful(language_code)
+            if result == account_logged_text:
+                self.db.insert_user_account(userId, account, wif)
+                text = f"account: {account}, wif: {wif}"
+                await bot.send_message(userId, result)
+                return web.json_response({'status': 'success', 'message': 'Login effettuato con successo'})
+            else:
+                await bot.send_message(userId, result)
+                return web.json_response({'status': 'error', 'message': 'Login fallito'}, status=401)
         except Exception as e:
             print(f"Errore durante la gestione della richiesta POST: {e}")
             return web.json_response({'status': 'error', 'message': 'Errore durante la gestione della richiesta POST'}, status=500)
