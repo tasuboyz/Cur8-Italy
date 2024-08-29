@@ -30,7 +30,9 @@ proglog==0.1.10
 pycryptodomex==3.20.0
 pydantic==2.8.2
 pydantic_core==2.20.1
+pyngrok==7.2.0
 pytz==2024.1
+PyYAML==6.0.2
 requests==2.32.3
 ruamel.yaml==0.18.6
 ruamel.yaml.clib==0.2.8
