@@ -1,5 +1,5 @@
 import React from 'react';
-import './Form css/DateTimePicker.css';
+import '../../App.css'
 
 interface DateTimePickerProps {
   value: string;
@@ -8,7 +8,7 @@ interface DateTimePickerProps {
 
 export const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange }) => {
   return (
-    <div className="form-group">
+    <div>
       <input
         type="datetime-local"
         id="dateTime"

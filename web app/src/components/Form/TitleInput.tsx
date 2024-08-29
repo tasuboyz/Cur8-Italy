@@ -1,5 +1,5 @@
 import React from 'react';
-import './Form css/TitleInput.css'
+//import '../../App.css'
 
 interface TitleInputProps {
   value: string;
@@ -9,7 +9,7 @@ interface TitleInputProps {
 
 export const TitleInput: React.FC<TitleInputProps> = ({ value, onChange, maxLength = 100 }) => {
   return (
-    <div className="title-input-container">
+    <div>
       <input
         type="text"
         id="title"

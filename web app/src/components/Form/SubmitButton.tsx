@@ -1,5 +1,5 @@
 import React from 'react';
-import './Form css/SubmitButton.css'
+//import '../../App.css'
 
 interface SubmitButtonProps {
   onClick: () => void;
@@ -8,7 +8,7 @@ interface SubmitButtonProps {
 
 export const SubmitButton: React.FC<SubmitButtonProps> = ({ onClick, loading }) => {
   return (
-    <div className="submit-button-container">
+    <div>
       <button onClick={onClick} className="submit-button" disabled={loading}>
         {loading ? 'Invio...' : 'Invia Messaggio'}
       </button>

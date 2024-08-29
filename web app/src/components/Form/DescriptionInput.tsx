@@ -1,5 +1,5 @@
 import React from 'react';
-import './Form css/DescriptionInput.css'
+import '../../App.css'
 
 interface DescriptionInputProps {
   value: string;
@@ -9,7 +9,8 @@ interface DescriptionInputProps {
 
 export const DescriptionInput: React.FC<DescriptionInputProps> = ({ value, onChange, maxLength = 15000 }) => {
   return (
-    <div className="form-group">
+    <div>
+    {/* <div className="input-description"> */}
       <textarea
         id="description"
         value={value}

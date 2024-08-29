@@ -1,5 +1,5 @@
 import React from 'react';
-import './Form css/TagInput.css'
+//import '../../App.css'
 
 interface TagInputProps {
   value: string;
@@ -8,7 +8,7 @@ interface TagInputProps {
 
 export const TagInput: React.FC<TagInputProps> = ({ value, onChange }) => {
   return (
-    <div className="form-group">
+    <div>
       <input
         type="text"
         id="tag"
