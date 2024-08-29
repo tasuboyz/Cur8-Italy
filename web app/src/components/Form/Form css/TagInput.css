@@ -1,24 +1,31 @@
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-control {
+input[id="tag"] {
+  color: white;
   width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  color: #333;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 5px 0;
+  box-sizing: border-box;
+  border: 1px solid #323238;
   border-radius: 4px;
-  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  font-size: 16px;
+  background-color: #202024;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.form-control:focus {
+input[id="tag"]:focus {
   border-color: #66afe9;
-  outline: 0;
-  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+  outline: none;
 }
 
-.form-control::placeholder {
+.input[id="tag"]::placeholder{
   color: #999;
+}
+
+.character-count[id="tag"]{
+  position: absolute;
+  bottom: -1.2rem;
+  right: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--placeholder-color);
+  transition: opacity 0.3s ease-in-out;
 }

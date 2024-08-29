@@ -1,8 +1,11 @@
-.form-group {
-    margin-bottom: 1rem;
+/* .form-group[type="datetime-local"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
   }
-  
-  #dateTime {
+   */
+  #dateTime[type="datetime-local"] {
     width: 100%;
     padding: 0.5rem;
     font-size: 1rem;
@@ -10,7 +13,7 @@
     border-radius: 4px;
   }
   
-  #dateTime:focus {
+  #dateTime:focus[type="datetime-local"] {
     outline: none;
     border-color: #8257E5;
     box-shadow: 0 0 0 3px rgba(130, 87, 229, 0.2);
