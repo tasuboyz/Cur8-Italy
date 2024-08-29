@@ -13,6 +13,9 @@ from command.basic.memory import Form
 from command.basic.language import Language
 from command.router_requests import Router_Requests
 from aiohttp import web
+from command.basic.config import BASE_WEBHOOK_URL
+import os
+from command.basic import config
 
 class BOT():
     def __init__(self):
@@ -21,12 +24,16 @@ class BOT():
         self.command = User_Commands()
         self.language = Language()
         self.router = Router()
-        self.app = web.Application()
+        self.app = web.Application(client_max_size=1024**2*10) 
         self.request_hendle = Router_Requests()
+        self.assets_url = os.getenv(config.url_ngrok, '/assets/')     
 
         #app route
         self.app.router.add_get('/', self.request_hendle.handle)
-        self.app.router.add_static('/assets/', path='./dist/assets', name='assets')
+        self.app.router.add_get('/post', self.request_hendle.handle)
+        self.app.router.add_get('/community-page', self.request_hendle.handle)
+        self.app.router.add_static(prefix=self.assets_url, path='./dist/assets', name='assets')
+        self.app.router.add_get('/config', self.request_hendle.get_assets_url)
         self.app.router.add_post('/post', self.request_hendle.handle_post)
         self.app.router.add_post('/image', self.request_hendle.recive_base64_image)
         self.app.router.add_post('/logged', self.request_hendle.send_logged_data)
