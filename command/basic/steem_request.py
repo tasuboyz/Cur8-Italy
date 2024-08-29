@@ -13,6 +13,7 @@ from .instance import bot
 from .config import admin_id
 from .language import Language
 from beem.vote import Vote
+from .logger_config import logger
 
 class Blockchain:
     def __init__(self, mode='irreversible'):
@@ -250,12 +251,14 @@ class Blockchain:
         stm = Steem(keys=[wif], node=self.steem_node, rpcuser=author)  
         try:
             account = Account(author, steem_instance=stm)
-        except Exception as ex:            
+        except Exception as ex:   
+            logger.error(ex, exc_info=True)         
             user_not_exist_text = self.language.username_not_exist(language_code)
             return user_not_exist_text
         try:
             posting_key = stm.wallet.getPostingKeyForAccount(author)   
-        except:
+        except Exception as ex:  
+            logger.error(ex, exc_info=True)  
             return "Posting key Invalid 🚫"
         result = stm.post(title=title, body=body, author=author, tags=tags, community=community, beneficiaries=beneficiario)
         return f"Post '{title}' pubblicato con successo!"
@@ -268,6 +271,7 @@ class Blockchain:
         return result
     
     def steem_logging(self, language_code, user_id, username, wif):
+        username = str(username).lower()
         try:
             stm = Steem(keys=[wif], node=self.steem_node, rpcuser=username) 
         except:
@@ -275,13 +279,14 @@ class Blockchain:
         try:
             account = Account(username, steem_instance=stm)
         except Exception as ex:            
+            logger.error(ex, exc_info=True) 
             user_not_exist_text = self.language.username_not_exist(language_code)
             return user_not_exist_text
         try:
             user = stm.wallet.getAccountFromPrivateKey(wif)   
             follow_result = account.follow('tasubot', what=['blog'], account=None)
         except Exception as ex:   
-            print(ex)
+            logger.error(ex, exc_info=True) 
             return "Posting key Invalid 🚫"
         try:
             self.db.insert_user_account(user_id, username, wif)

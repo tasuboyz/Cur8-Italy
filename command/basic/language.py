@@ -664,7 +664,7 @@
         }
         return lang_text.get(language_code, eng)
     
-    def post_saved_message(language_code, date_time):
+    def post_saved_message(self, language_code, date_time):
         eng_message = f"The post has been saved and will be published at {date_time}."
 
         translations = {
@@ -759,6 +759,21 @@
             'ar': "تم إلغاء الاشتراك 🚫"
         }
 
+        return translations.get(language_code, eng_message)
+    
+    def date_time_error_message(self, language_code):
+        eng_message = "dateTime cannot be earlier than the current time 🚫"
+        translations = {
+            'it': "La data e l'ora non possono essere precedenti all'ora attuale 🚫",
+            'hi': "दिनांक और समय वर्तमान समय से पहले नहीं हो सकते 🚫",
+            'es': "La fecha y hora no pueden ser anteriores a la hora actual 🚫",
+            'fr': "La date et l'heure ne peuvent pas être antérieures à l'heure actuelle 🚫",
+            'de': "Datum und Uhrzeit dürfen nicht vor der aktuellen Uhrzeit liegen 🚫",
+            'ru': "Дата и время не могут быть раньше текущего времени 🚫",
+            'uk': "Дата і час не можуть бути раніше поточного часу 🚫",
+            'zh': "日期和时间不能早于当前时间 🚫",
+            'ar': "لا يمكن أن يكون التاريخ والوقت قبل الوقت الحالي 🚫"
+        }
         return translations.get(language_code, eng_message)
 
 ##################################################################################

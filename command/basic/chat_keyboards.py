@@ -5,13 +5,13 @@ from .user import UserInfo
 from aiogram import Bot
 from .db import Database
 from .language import Language
-from .config import BASE_WEBHOOK_URL
+from .config import url_ngrok
 
 class Keyboard_Manager:
     def __init__(self):
         self.db = Database()
         #self.postpage_url = 'https://tasuboyz.github.io/Posting-Web-App/'
-        self.postpage_url = BASE_WEBHOOK_URL
+        self.postpage_url = url_ngrok
         self.loginpage_url = 'https://tasuboyz.github.io/login-page/'      
         self.SignIn_url = 'https://tasuboyz.github.io/Sign-In/'
         self.Account_Set_Url = 'https://tasuboyz.github.io/Account-Info/'
@@ -55,11 +55,11 @@ class Keyboard_Manager:
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard)
         return keyboard
     
-    def create_start_reply_keyboard(self, message=None):
+    def create_start_reply_keyboard(self, user_id=None, language_code=None):
         keyboard = []
-        info = UserInfo(message)
-        user_id = info.user_id
-        language_code = info.language
+        # info = UserInfo(message)
+        # user_id = info.user_id
+        # language_code = info.language
         set_setting_text = self.language.setting(language_code)
         ask_copilot_text= self.language.ask_copilot(language_code)
         steemit_query_copilot_text = self.language.steemit_query_copilot(language_code)  
@@ -162,5 +162,11 @@ class Keyboard_Manager:
     def vote_post(self, permlink):
         keyboard = []
         keyboard.append([InlineKeyboardButton(text=f"❤️", callback_data=f"vote:{permlink}")])
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard)
+        return keyboard
+    
+    def open_web_app(self):
+        keyboard = []
+        keyboard.append([InlineKeyboardButton(text="Open", web_app=WebAppInfo(url=self.postpage_url))])
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard)
         return keyboard
