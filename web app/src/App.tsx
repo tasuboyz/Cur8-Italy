@@ -5,6 +5,7 @@ import PostingPage from './page/PostPage';
 import LoadingSpinner from './components/LoadingSpinner'; // Assicurati di creare questo componente
 import { Telegram } from "@twa-dev/types";
 import CommunityPage from './page/CommunityPage';
+import './App.css'
 
 declare global {
   interface Window {
