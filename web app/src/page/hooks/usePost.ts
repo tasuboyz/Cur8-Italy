@@ -16,6 +16,10 @@ export const usePost = () => {
         setError(response.error);
       }
     } catch (err) {
+      window.Telegram.WebApp.showPopup({
+      title: "Errore",
+      message: `${error}`,
+      buttons: [{ type: 'ok' }]});
       setError('Errore durante l\'invio del messaggio');
     } finally {
       setLoading(false);
