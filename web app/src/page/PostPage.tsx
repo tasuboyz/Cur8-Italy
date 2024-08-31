@@ -2,7 +2,7 @@ import React, { ChangeEvent } from 'react';
 import './PostPage.css';
 import { usePost } from './hooks/usePost';
 import { TitleInput } from '../components/Form/TitleInput';
-//import { CommunityInput } from '../components/Form/CommunityInput';
+import { CommunityButton } from '../components/Form/CommunityButton';
 import { DescriptionInput } from '../components/Form/DescriptionInput';
 import { TagInput } from '../components/Form/TagInput';
 import { DateTimePicker } from '../components/Form/DateTimePicker';
@@ -19,12 +19,17 @@ function PostingPage() {
   const [dateTime, setDateTime] = React.useState('');
   const { user } = useUser();
   const [communityId, setCommunityId] = React.useState<string | null>(null);
+  const [communityName, setCommunityName] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     // Recuperiamo l'ID della community dal localStorage
     const savedCommunityId = localStorage.getItem('selectedCommunityId');
+    const savedCommunityName = localStorage.getItem('selectedCommunityName');
     if (savedCommunityId) {
       setCommunityId(savedCommunityId);
+    }
+    if (savedCommunityName) {
+      setCommunityName(savedCommunityName);
     }
   }, []);
   // const [community, setCommunity] = React.useState('');
@@ -81,16 +86,13 @@ function PostingPage() {
       userId: user.userId,
       communityId: communityId
     };
-  
-    await sendMessage(post);
-  
-    localStorage.removeItem('title');
-    localStorage.removeItem('description');
+      await sendMessage(post);
+      localStorage.removeItem('title');
+      localStorage.removeItem('description');
 
-    window.Telegram.WebApp.close();
+      window.Telegram.WebApp.close();
   };
   
-
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -169,7 +171,7 @@ function PostingPage() {
   return (
     <div className="container">
       <div>
-      <button onClick={handleButtonClick}>Search Community</button>
+        <CommunityButton onClick={handleButtonClick} communityName={communityName || ''} />
         <TitleInput value={titolo} onChange={handleTitleChange} />
         <DescriptionInput value={description} onChange={handleDescriptionChange} />
         <TagInput value={tag} onChange={handleTagChange} />

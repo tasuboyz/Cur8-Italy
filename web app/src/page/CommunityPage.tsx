@@ -1,5 +1,6 @@
 import React from 'react';
 import './CommunityPage.css';
+import '../App.css'
 import { Telegram } from "@twa-dev/types";
 import { Box, List, ListItem, ListItemText, Container, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -83,14 +84,17 @@ function PostingPage() {
   const handleCommunitySelect = (selectedName: string, selectedId: string) => {
     setCommunity(selectedName);
     localStorage.setItem('selectedCommunityId', selectedId);
+    localStorage.setItem('selectedCommunityName', selectedName);
+    window.Telegram.WebApp.BackButton.hide();
     navigate('/post');
   };
 
   return (
-    <div className="container">
+    <div className="container-community">
     <Container>
-      <Box className="container" sx={{ padding: 2 }}>
+      <Box className="container-community" sx={{ padding: 2 }}>
         <TextField
+          id = 'community-input' 
           label="Search Community"
           value={community}
           onChange={handleCommunityChange}
@@ -108,11 +112,6 @@ function PostingPage() {
             </ListItem>
             );
           })}
-            {/* {communityNames.map((name, index) => (
-              <ListItem button key={index} onClick={() => handleCommunitySelect(name)}>
-                <ListItemText primary={name} />
-              </ListItem>
-            ))} */}
           </List>
         </Box>
       </Box>
