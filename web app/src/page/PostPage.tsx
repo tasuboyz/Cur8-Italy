@@ -10,6 +10,7 @@ import { SubmitButton } from '../components/Form/SubmitButton';
 import useUser from './contexts/useUser';
 import { postAPI } from './api/postAPI';
 import { useNavigate } from 'react-router-dom';
+import FileInput from '../components/Form/FileInput';
 
 function PostingPage() {
   
@@ -54,19 +55,6 @@ function PostingPage() {
     setDateTime(event.target.value);
   };
 
-  // const handleCommunityChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setCommunity(event.target.value);
-  // };
-
-  // const handleButtonClick = async () => {
-  //   try {
-  //     const response = await postAPI.searchCommunity(community);
-  //     const data = await response.data;
-  //     setListItems(data.map(item => item.name));
-  //   } catch (error) {
-  //     console.error('Error fetching list:', error);
-  //   }
-  // };
 
   const handleButtonClick = async () => {
     try {
@@ -93,18 +81,18 @@ function PostingPage() {
       window.Telegram.WebApp.close();
   };
   
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageBase64 = reader.result as string;
-        handleSubmit(imageBase64);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       const imageBase64 = reader.result as string;
+  //       handleSubmit(imageBase64);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   React.useEffect(() => {
     const savedTags = localStorage.getItem('tags');
@@ -164,10 +152,18 @@ function PostingPage() {
     }
   };
 
-  // const handleItemClick = (item: string) => {
-  //   setSelectedItem(item);
-  // };
-
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageBase64 = reader.result as string;
+        handleSubmit(imageBase64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
   return (
     <div className="container">
       <div>
@@ -176,14 +172,9 @@ function PostingPage() {
         <DescriptionInput value={description} onChange={handleDescriptionChange} />
         <TagInput value={tag} onChange={handleTagChange} />
         <DateTimePicker value={dateTime} onChange={handleDateTimeChange} />
-        <input type="file" onChange={handleImageChange} />
+        <FileInput onChange={handleFileChange} />
+        {/* <input type="file" onChange={handleImageChange} /> */}
         <SubmitButton onClick={inviaMessaggio} loading={loading} />
-        {/* <CommunityInput
-          value={community}
-          onChange={handleCommunityChange}
-          communities={[]} // Passa qui la tua lista di comunità
-          onSelect={(community) => console.log('Community selected:', community)}
-        /> */}   
       </div>
     </div>
   );
