@@ -4,19 +4,19 @@ from pyngrok import ngrok
 TEST = True
 
 if TEST:
-    TOKEN = "6348055484:AAGhOv6sx5B4acQj-XUfRWV3kJz53FvioWs" #TasuAdmin
+    TOKEN = "" #TasuAdmin
     log_level = logging.INFO 
-    cur8_channel = '@tasu_lessons'
-    report_channel = '@tasu_lessons'
+    cur8_channel = '@'
+    report_channel = '@'
 else:
-    TOKEN = '7122531030:AAGK6dDoGpeDSShlTuJnbXEJkmXZpV6m06s' #token produzione
+    TOKEN = '' #token produzione
     log_level = logging.ERROR
     cur8_channel = '@test_sniper_cur8'
-    report_channel = '@cur8earn'
+    report_channel = '@'
 
-admin_id = 1026795763
+admin_id = ''
 
-account_creation_channel = -1002247582547
+account_creation_channel = 1234
 
 api_base_url = 'http://localhost:8081'  
 
@@ -32,7 +32,7 @@ WEBHOOK_PATH = r"/webhook"
 
 WEBHOOK_SECRET = "my-secret"
 
-ngrok_auth = "2Z1tsHdF5l2g4Slv6ICPPIJNL7k_6MUTNq4LhqaYgi9cV1qsw"
+ngrok_auth = ""
 
 ngrok.set_auth_token(ngrok_auth)
 
